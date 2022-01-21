@@ -38,23 +38,22 @@ void runTest(uint16_t maxValue, float scale)
 {
     int badCount = 0;
     int diffCounts[MAX_DIFF + 1];
-    memset(diffCounts, 0, MAX_DIFF + 1);
+    memset(diffCounts, 0, sizeof(int) * (MAX_DIFF + 1));
 
     for (uint16_t i = 0; i <= maxValue; ++i) {
         uint16_t h = toHalf(i, 1.0f / scale);
         float f = canardConvertFloat16ToNativeFloat(h);
 
         int rounded = (int)((f * scale) + 0.5f);
+        int diff = rounded - i;
+        if (diff < 0) {
+            diff *= -1;
+        }
+        assert(diff <= MAX_DIFF);
+        ++diffCounts[diff];
+
         if ((int)i != rounded) {
             ++badCount;
-
-            int diff = rounded - i;
-            if (diff < 0) {
-                diff *= -1;
-            }
-            assert(diff <= MAX_DIFF);
-            ++diffCounts[diff];
-
             // printf("BAD: [%u] becomes %f (%d)\n", i, f, rounded);
         }
     }
